@@ -3,29 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#121212"
-    android:weightSum="10">
+    android:gravity="center"
+    android:padding="16dp">
 
-    <androidx.camera.view.PreviewView
-        android:id="@+id/previewView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="4" />
-
-    <TextView
-        android:layout_width="match_parent"
+    <Button
+        android:id="@+id/btnCapture"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#1F1F1F"
-        android:padding="12dp"
-        android:text="Зафиксированные номерные знаки:"
-        android:textColor="#FFFFFF"
-        android:textSize="14sp"
-        android:textStyle="bold" />
+        android:text="Сделать фото" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerView"
+    <ImageView
+        android:id="@+id/itemImage"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="6" />
+        android:layout_height="300dp"
+        android:layout_marginTop="20dp"
+        android:scaleType="fitCenter" />
 
 </LinearLayout>
