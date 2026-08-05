@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [PlateEntity::class], version = 1, exportSchema = false)
+@Database(entities = [PlateEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun plateDao(): PlateDao
 
@@ -19,7 +19,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "license_plates_db"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // Пересоздаст БД при изменении структуры
+                .build()
                 INSTANCE = instance
                 instance
             }
