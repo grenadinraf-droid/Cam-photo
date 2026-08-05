@@ -1,4 +1,4 @@
-package com.example.camphotolpr
+package com.example.camphoto
 
 import android.content.Context
 import androidx.room.Database
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "license_plates_db"
                 )
-                .fallbackToDestructiveMigration() // Пересоздаст БД при изменении структуры
+                .fallbackToDestructiveMigration()
                 .build()
                 INSTANCE = instance
                 instance
