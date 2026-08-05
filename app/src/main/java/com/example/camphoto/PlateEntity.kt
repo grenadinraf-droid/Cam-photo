@@ -1,4 +1,4 @@
-package com.example.camphotolpr
+package com.example.camphoto
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
