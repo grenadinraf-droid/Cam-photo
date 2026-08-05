@@ -1,9 +1,16 @@
 package com.example.camphotolpr
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.ImageFormat
+import android.graphics.Rect
+import android.graphics.YuvImage
 import android.os.Bundle
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.OptIn
@@ -19,6 +26,9 @@ import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.regex.Pattern
@@ -27,10 +37,10 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var viewFinder: PreviewView
     private lateinit var tvCurrentPlate: TextView
+    private lateinit var btnOpenHistory: Button
     private lateinit var cameraExecutor: ExecutorService
     private lateinit var database: AppDatabase
     
-    // Регулярное выражение для поиска автомобыльных номеров (формат: 2 буквы, 4 цифры, 2 буквы)
     private val platePattern = Pattern.compile("[A-ZА-Я]{2}\\s?\\d{4}\\s?[A-ZА-Я]{2}")
     private var lastSavedPlate = ""
 
@@ -40,9 +50,14 @@ class MainActivity : AppCompatActivity() {
 
         viewFinder = findViewById(R.id.viewFinder)
         tvCurrentPlate = findViewById(R.id.tvCurrentPlate)
+        btnOpenHistory = findViewById(R.id.btnOpenHistory)
         
         database = AppDatabase.getDatabase(this)
         cameraExecutor = Executors.newSingleThreadExecutor()
+
+        btnOpenHistory.setOnClickListener {
+            startActivity(Intent(this, HistoryActivity::class.java))
+        }
 
         if (allPermissionsGranted()) {
             startCamera()
@@ -67,9 +82,9 @@ class MainActivity : AppCompatActivity() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, { imageProxy ->
+                    it.setAnalyzer(cameraExecutor) { imageProxy ->
                         processImageProxy(imageProxy)
-                    })
+                    }
                 }
 
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -100,15 +115,14 @@ class MainActivity : AppCompatActivity() {
                         if (matcher.find()) {
                             val foundPlate = matcher.group()
                             
-                            // Обновляем текст на экране
                             runOnUiThread {
                                 tvCurrentPlate.text = "Найден номер: $foundPlate"
                             }
 
-                            // Если номер отличается от предыдущего сохраненного, записываем в БД
                             if (foundPlate != lastSavedPlate) {
                                 lastSavedPlate = foundPlate
-                                savePlateToDatabase(foundPlate)
+                                val savedImagePath = saveFrameToFile(imageProxy)
+                                savePlateToDatabase(foundPlate, savedImagePath)
                             }
                         }
                     }
@@ -121,11 +135,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun savePlateToDatabase(plate: String) {
+    private fun saveFrameToFile(imageProxy: ImageProxy): String {
+        return try {
+            val bitmap = imageProxy.toBitmap()
+            val file = File(filesDir, "plate_${System.currentTimeMillis()}.jpg")
+            FileOutputStream(file).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, out)
+            }
+            file.absolutePath
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+    private fun savePlateToDatabase(plate: String, imagePath: String) {
         lifecycleScope.launch(Dispatchers.IO) {
-            database.plateDao().insert(PlateEntity(plateNumber = plate))
+            database.plateDao().insert(PlateEntity(plateNumber = plate, imagePath = imagePath))
             runOnUiThread {
-                Toast.makeText(this@MainActivity, "Сохранено в базу: $plate", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@MainActivity, "Сохранено с фото: $plate", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -138,12 +165,8 @@ class MainActivity : AppCompatActivity() {
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == REQUEST_CODE_PERMISSIONS) {
-            if (allPermissionsGranted()) {
-                startCamera()
-            } else {
-                Toast.makeText(this, "Необходимо разрешение на использование камеры", Toast.LENGTH_SHORT).show()
-            }
+        if (requestCode == REQUEST_CODE_PERMISSIONS && allPermissionsGranted()) {
+            startCamera()
         }
     }
 
