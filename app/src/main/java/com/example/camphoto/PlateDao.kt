@@ -1,4 +1,4 @@
-package com.example.camphotolpr
+package com.example.camphoto
 
 import androidx.room.Dao
 import androidx.room.Insert
