@@ -4,14 +4,12 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <!-- Видоискатель камеры -->
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
 
-    <!-- Панель для вывода текущего найденного номера -->
     <TextView
         android:id="@+id/tvCurrentPlate"
         android:layout_width="match_parent"
@@ -23,5 +21,12 @@
         android:textColor="#FFFFFF"
         android:textSize="20sp"
         android:textStyle="bold" />
+
+    <Button
+        android:id="@+id/btnOpenHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="Открыть базу номеров" />
 
 </LinearLayout>
