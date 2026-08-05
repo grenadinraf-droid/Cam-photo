@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.camphotolpr"
+    namespace = "com.example.camphoto"
     compileSdk = 34
 
     defaultConfig {
