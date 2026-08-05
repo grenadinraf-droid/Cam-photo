@@ -8,7 +8,8 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlateDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(plate: PlateEntity)
 
     @Query("SELECT * FROM license_plates ORDER BY timestamp DESC")
