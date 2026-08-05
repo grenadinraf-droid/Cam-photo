@@ -1,4 +1,4 @@
-package com.example.camphotolpr
+package com.example.camphoto
 
 import android.Manifest
 import android.content.Intent
