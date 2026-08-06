@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Cam-photo"
-include(":app")
+include(":app") 
